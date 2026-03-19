@@ -61,17 +61,17 @@ uv sync                          # Install dependencies
 uv run pytest tests/ -v          # Run all tests
 uv run pytest tests/test_indicators.py -v  # Run a single test file
 uv run ruff check src/ tests/    # Lint
-uv run python main.py backfill   # Backfill historical data from Hyperliquid
-uv run python main.py trade      # Start trading loop (paper mode by default, set mode: "live" in config.yaml for real orders)
-uv run python main.py backfill-predictions  # Fetch current prediction market snapshots
-uv run python main.py backtest             # Run backtest over historical data
-uv run python main.py walkforward          # Walk-forward overfitting analysis
-uv run python main.py sensitivity          # Parameter sensitivity sweep
-uv run python main.py screen              # Screen symbols by Hurst exponent for mean-reversion fit
-uv run python main.py review --weeks 1    # Weekly performance report
-uv run python main.py compare --days 7   # Compare paper trades vs backtest over same period
-uv run python main.py tui               # Launch TUI dashboard (attach to running daemon)
-uv run python main.py status            # One-shot daemon state query (JSON output)
+perpbot backfill               # Backfill historical data from Hyperliquid
+perpbot trade                  # Start trading loop (paper mode by default, set mode: "live" in config.yaml for real orders)
+perpbot backfill-predictions   # Fetch current prediction market snapshots
+perpbot backtest               # Run backtest over historical data
+perpbot walkforward            # Walk-forward overfitting analysis
+perpbot sensitivity            # Parameter sensitivity sweep
+perpbot screen                 # Screen symbols by Hurst exponent for mean-reversion fit
+perpbot review --weeks 1       # Weekly performance report
+perpbot compare --days 7       # Compare paper trades vs backtest over same period
+perpbot tui                    # Launch TUI dashboard (attach to running daemon)
+perpbot status                 # One-shot daemon state query (JSON output)
 ```
 
 ## Conventions

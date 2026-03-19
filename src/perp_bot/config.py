@@ -9,8 +9,6 @@ from pathlib import Path
 import yaml
 from dotenv import load_dotenv
 
-_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
-
 
 @dataclass(frozen=True)
 class TradingConfig:
@@ -117,11 +115,14 @@ class BotConfig:
 
 def load_config(config_path: str | Path | None = None) -> BotConfig:
     """Load config from YAML file + environment variables."""
-    load_dotenv(_PROJECT_ROOT / ".env")
-
     if config_path is None:
-        config_path = _PROJECT_ROOT / "config.yaml"
-    config_path = Path(config_path)
+        config_path = Path.cwd() / "config.yaml"
+        env_path = Path.cwd() / ".env"
+    else:
+        config_path = Path(config_path).expanduser().resolve()
+        env_path = config_path.parent / ".env"
+
+    load_dotenv(env_path)
 
     with open(config_path) as f:
         raw = yaml.safe_load(f)

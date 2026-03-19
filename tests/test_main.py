@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 from types import SimpleNamespace
 
-import main
+import perp_bot.cli as main
 from perp_bot.config import (
     BacktestConfig,
     BotConfig,
@@ -250,8 +251,23 @@ def test_run_trading_loop_reconciles_before_losing_weeks_halt(monkeypatch):
     monkeypatch.setattr(main, "_tick", fake_tick)
     monkeypatch.setattr(main, "_alert", lambda *_args, **_kwargs: None)
     monkeypatch.setattr(main, "get_socket_path", lambda _db_path: Path("/tmp/perp-bot.sock"))
-    monkeypatch.setattr(main.sys, "argv", ["main.py", "trade"])
 
     main.run_trading_loop()
 
     assert call_order == ["reconcile", "check", "tick"]
+
+
+def test_main_passes_force_to_trade_command(monkeypatch):
+    called: list[tuple[str | None, bool]] = []
+
+    monkeypatch.setattr(main, "setup_logging", lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        main,
+        "run_trading_loop",
+        lambda config_path=None, force=False: called.append((config_path, force)),
+    )
+    monkeypatch.setattr(sys, "argv", ["perpbot", "trade", "--config", "config.yaml", "--force"])
+
+    main.main()
+
+    assert called == [("config.yaml", True)]
