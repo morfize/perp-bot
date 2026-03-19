@@ -7,6 +7,7 @@ import json
 import logging
 import sys
 import time
+from pathlib import Path
 
 import pandas as pd
 
@@ -68,12 +69,8 @@ def run_trading_loop(config_path: str | None = None) -> None:
     ingestor = DataIngestor(config, db, client)
     signal_engine = SignalEngine(config.signals)
     risk_manager = RiskManager(config, db)
-
-    # Auto-stop after 3 consecutive losing weeks (§5.3)
-    if not _check_losing_weeks(db) and not any(a == "--force" for a in sys.argv):
-        logger.error("Use --force to override the losing weeks halt")
-        _alert(config, "BOT HALTED: 3 consecutive losing weeks")
-        sys.exit(1)
+    forced = any(a == "--force" for a in sys.argv)
+    entries_halted = False
 
     # Mode-specific setup
     executor: Executor
@@ -95,6 +92,26 @@ def run_trading_loop(config_path: str | None = None) -> None:
     else:
         executor = PaperExecutor(db)
         logger.info("Paper mode — no real orders")
+
+    # Auto-stop after 3 consecutive losing weeks (§5.3)
+    if not _check_losing_weeks(db) and not forced:
+        open_trade_count = len(db.get_open_trades())
+        if config.mode == "live" and open_trade_count > 0:
+            entries_halted = True
+            logger.warning(
+                "Losing weeks halt active — managing %d existing live position(s),"
+                " new entries disabled",
+                open_trade_count,
+            )
+            _alert(
+                config,
+                "BOT HALTED: 3 consecutive losing weeks — managing existing"
+                " live positions only",
+            )
+        else:
+            logger.error("Use --force to override the losing weeks halt")
+            _alert(config, "BOT HALTED: 3 consecutive losing weeks")
+            sys.exit(1)
 
     # WebSocket for real-time prices (both modes benefit)
     ws_client = WsClient()
@@ -156,7 +173,7 @@ def run_trading_loop(config_path: str | None = None) -> None:
                 config, db, client, ingestor, signal_engine,
                 risk_manager, executor, tf, min_candles,
                 prediction_clients, last_prediction_poll_ms,
-                ws_client, daemon_state,
+                ws_client, daemon_state, entries_halted,
             )
 
             # Update daemon state after tick
@@ -278,7 +295,7 @@ def _tick(
     config, db, client, ingestor, signal_engine,
     risk_manager, executor, tf, min_candles,
     prediction_clients=None, last_prediction_poll_ms=0,
-    ws_client=None, daemon_state=None,
+    ws_client=None, daemon_state=None, entries_halted=False,
 ) -> tuple[int, str]:
     """Single iteration of the trading loop. Returns (last_prediction_poll_ms, regime_label)."""
     prediction_clients = prediction_clients or {}
@@ -324,7 +341,7 @@ def _tick(
 
             # Capital-based stop loss
             if risk_manager.check_stop_loss(
-                trade["entry_price"], current_price, trade["side"]
+                trade["entry_price"], current_price, trade["side"], trade["size_usd"],
             ):
                 pnl = _compute_pnl(trade, current_price)
                 executor.close_position(
@@ -371,6 +388,11 @@ def _tick(
             _alert(config, f"CLOSE {symbol} {result.reason} pnl={pnl:.2f}")
 
         elif result.signal in (Signal.LONG, Signal.SHORT) and not open_trades:
+            if entries_halted:
+                logger.info(
+                    "Entry blocked by losing weeks halt for %s", symbol,
+                )
+                continue
             risk_check = risk_manager.check_entry()
             if risk_check.allowed:
                 size = risk_manager.compute_position_size(prediction_regime)
@@ -381,7 +403,15 @@ def _tick(
                     )
                     continue
                 price = _get_price(ws_client, client, symbol)
-                executor.open_position(symbol, result.signal.value, size, price)
+                trade_id = executor.open_position(
+                    symbol, result.signal.value, size, price,
+                )
+                if trade_id is None:
+                    logger.error(
+                        "Entry failed for %s %s — skipping OPEN alert",
+                        result.signal.value, symbol,
+                    )
+                    continue
                 regime_tag = ""
                 if prediction_regime != PredictionRegime.NORMAL:
                     regime_tag = f" [{prediction_regime.value}]"
@@ -582,8 +612,11 @@ def run_backtest(config_path: str | None = None) -> None:
             result = engine.run(db, symbol)
             print(result.summary())
             if bt_config.export_trades_csv:
-                result.trades_to_csv(bt_config.export_trades_csv)
-                logger.info("Trades exported to %s", bt_config.export_trades_csv)
+                export_path = _trade_export_path(
+                    bt_config.export_trades_csv, symbol, config.trading.symbols,
+                )
+                result.trades_to_csv(export_path)
+                logger.info("Trades exported to %s", export_path)
     finally:
         db.close()
 
@@ -685,7 +718,7 @@ def run_screen(config_path: str | None = None) -> None:
 
             # Hurst exponent from historical candles
             candles = db.get_candles(
-                symbol, config.data.primary_timeframe, limit=500,
+                symbol, config.data.primary_timeframe, limit=500, descending=True,
             )
             if len(candles) < 50:
                 continue
@@ -732,6 +765,19 @@ def run_compare(
             print()
     finally:
         db.close()
+
+
+def _trade_export_path(
+    raw_path: str, symbol: str, all_symbols: list[str],
+) -> str:
+    """Return a per-symbol export path when backtesting multiple symbols."""
+    if len(all_symbols) == 1:
+        return raw_path
+
+    path = Path(raw_path)
+    if path.suffix:
+        return str(path.with_name(f"{path.stem}-{symbol}{path.suffix}"))
+    return str(path.with_name(f"{path.name}-{symbol}"))
 
 
 def run_review(config_path: str | None = None, weeks: int = 1) -> None:
