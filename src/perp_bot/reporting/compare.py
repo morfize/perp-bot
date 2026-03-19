@@ -27,7 +27,10 @@ def compare_paper_vs_backtest(
 
     # --- Paper trade metrics ---
     paper_trades = db.get_closed_trades_in_range(start_ms, end_ms)
-    paper_trades = [t for t in paper_trades if t["symbol"] == symbol]
+    paper_trades = [
+        t for t in paper_trades
+        if t["symbol"] == symbol and t["is_paper"] == 1
+    ]
     paper_stats = _compute_stats(paper_trades, "Paper")
 
     # --- Backtest over the same range ---
