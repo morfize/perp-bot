@@ -65,16 +65,17 @@ class RiskManager:
             size *= self.config.prediction.position_size_reduction
         return size
 
-    def check_stop_loss(self, entry_price: float, current_price: float, side: str) -> bool:
+    def check_stop_loss(
+        self, entry_price: float, current_price: float, side: str, size_usd: float,
+    ) -> bool:
         """Check if the capital-based stop-loss threshold is breached.
 
         Returns True if the position should be stopped out.
         """
-        position_size = self.compute_position_size()
         if side == "long":
-            pnl = (current_price - entry_price) / entry_price * position_size
+            pnl = (current_price - entry_price) / entry_price * size_usd
         else:
-            pnl = (entry_price - current_price) / entry_price * position_size
+            pnl = (entry_price - current_price) / entry_price * size_usd
 
         max_loss = self.trading.capital_usd * self.risk.max_loss_per_trade_pct
         return pnl <= -max_loss

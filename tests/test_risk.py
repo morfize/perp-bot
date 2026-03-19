@@ -78,9 +78,16 @@ class TestRiskManager:
         db = Database(":memory:")
         rm = RiskManager(config, db)
         # Long position: entry 3000, current 2950 → loss = 50/3000 * 1005 = $16.75
-        assert not rm.check_stop_loss(3000.0, 2950.0, "long")
+        assert not rm.check_stop_loss(3000.0, 2950.0, "long", 1005.0)
         # Entry 3000, current 2900 → loss = 100/3000 * 1005 = $33.50 > $20.10 (3% of 670)
-        assert rm.check_stop_loss(3000.0, 2900.0, "long")
+        assert rm.check_stop_loss(3000.0, 2900.0, "long", 1005.0)
+
+    def test_stop_loss_uses_actual_trade_size(self):
+        config = _test_config()
+        db = Database(":memory:")
+        rm = RiskManager(config, db)
+        # Same 3.33% move, but only half-sized notional -> $16.75 loss, below threshold.
+        assert not rm.check_stop_loss(3000.0, 2900.0, "long", 502.5)
 
     def test_cooldown_blocks_entry(self):
         config = _test_config()
