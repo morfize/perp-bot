@@ -1,0 +1,29 @@
+[Unit]
+Description=Hyperliquid Mean Reversion Trading Bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=perp-bot
+Group=perp-bot
+WorkingDirectory=/opt/perp-bot
+EnvironmentFile=/opt/perp-bot/.env
+ExecStart=/opt/perp-bot/.venv/bin/python main.py trade
+Restart=always
+RestartSec=10
+WatchdogSec=300
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/perp-bot
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=perp-bot
+
+[Install]
+WantedBy=multi-user.target

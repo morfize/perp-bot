@@ -1,0 +1,48 @@
+[project]
+name = "perp-bot"
+version = "0.1.0"
+description = "Hyperliquid mean-reversion perpetual futures trading bot"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "hyperliquid-python-sdk",
+    "websockets",
+    "pandas",
+    "numpy",
+    "eth_account",
+    "python-dotenv",
+    "pyyaml",
+    "textual>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "ruff",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+    "pytest-asyncio>=1.3.0",
+    "ruff>=0.15.6",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/perp_bot"]

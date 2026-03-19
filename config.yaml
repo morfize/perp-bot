@@ -1,0 +1,82 @@
+# ===== Trading Parameters =====
+trading:
+  symbols: ["ETH"]
+  leverage: 3
+  capital_usd: 670.0
+  margin_usage_limit: 0.5  # max 50% of margin
+
+# ===== Signal Parameters =====
+signals:
+  zscore_lookback: 20
+  zscore_entry_threshold: 2.0
+  zscore_exit_threshold: 0.3
+  zscore_stop_threshold: 3.0
+  bollinger_period: 20
+  bollinger_std: 2.0
+  rsi_period: 14
+  rsi_overbought: 70
+  rsi_oversold: 30
+  adx_period: 14
+  adx_threshold: 25  # below this = range-bound (trade allowed)
+
+# ===== Risk Management =====
+risk:
+  max_loss_per_trade_pct: 0.03   # 3% of capital
+  daily_loss_limit_pct: 0.08     # 8% of capital
+  max_positions: 1
+  cooldown_seconds: 1800         # 30 min after stop-loss
+  position_timeout_hours: 24
+
+# ===== Data =====
+data:
+  timeframes: ["1m", "5m", "15m", "1h"]
+  primary_timeframe: "15m"
+  history_days: 90
+  db_path: "perp_bot.db"
+
+# ===== Execution =====
+execution:
+  order_type: "limit"           # limit-first strategy
+  taker_fallback_seconds: 30    # switch to market after this
+  use_server_side_stop: true
+
+# ===== Prediction Markets =====
+prediction:
+  enabled: true
+  poll_interval_minutes: 15
+  war_risk_threshold: 0.4         # above this → HIGH_RISK regime
+  war_risk_crisis_threshold: 0.7  # above this → CRISIS regime
+  rate_change_threshold: 0.3      # magnitude above this → DOVISH/HAWKISH
+  position_size_reduction: 0.5    # multiply size by this in HIGH_RISK
+  markets:
+    - slug: "iran_conflict"
+      source: "polymarket"
+      market_id: "<condition_id>"   # replace with actual Polymarket condition ID
+      category: "war_risk"
+      weight: 0.6
+    - slug: "ukraine_escalation"
+      source: "polymarket"
+      market_id: "<condition_id>"   # replace with actual Polymarket condition ID
+      category: "war_risk"
+      weight: 0.4
+    - slug: "fed_rate_next_fomc"
+      source: "kalshi"
+      market_id: "FED-..."          # replace with actual Kalshi ticker
+      category: "rate_change"
+      weight: 1.0
+
+# ===== Backtest =====
+backtest:
+  maker_fee_rate: 0.00015         # 0.015% maker
+  taker_fee_rate: 0.00045         # 0.045% taker
+  slippage_min_pct: 0.0001        # 0.01% min slippage
+  slippage_max_pct: 0.0005        # 0.05% max slippage
+  entry_delay_candles: 1          # 1-candle execution delay
+  cancel_if_signal_gone: true     # cancel pending order if signal disappears
+  train_days: 60                  # walk-forward train window
+  test_days: 15                   # walk-forward test window
+  step_days: 15                   # walk-forward step size
+  seed: 42                        # reproducible slippage
+
+# ===== Mode =====
+mode: "paper"  # paper | live
