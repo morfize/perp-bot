@@ -98,6 +98,7 @@ class Database:
         timeframe: str,
         start_time: int | None = None,
         limit: int = 5000,
+        descending: bool = False,
     ) -> list[dict]:
         """Fetch candles ordered by open_time ascending."""
         query = "SELECT * FROM candles WHERE symbol = ? AND timeframe = ?"
@@ -105,11 +106,15 @@ class Database:
         if start_time is not None:
             query += " AND open_time >= ?"
             params.append(start_time)
-        query += " ORDER BY open_time ASC LIMIT ?"
+        order = "DESC" if descending else "ASC"
+        query += f" ORDER BY open_time {order} LIMIT ?"
         params.append(limit)
         cur = self.conn.execute(query, params)
         cols = [d[0] for d in cur.description]
-        return [dict(zip(cols, row)) for row in cur.fetchall()]
+        rows = [dict(zip(cols, row)) for row in cur.fetchall()]
+        if descending:
+            rows.reverse()
+        return rows
 
     def get_latest_candle_time(self, symbol: str, timeframe: str) -> int | None:
         """Return the most recent open_time for incremental fetching."""
