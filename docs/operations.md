@@ -33,15 +33,16 @@ Additional startup behavior:
 ```bash
 cp .env.example .env
 uv sync --group dev
-uv run perpbot backfill
-uv run perpbot trade
+source .venv/bin/activate
+perpbot backfill
+perpbot trade
 ```
 
 In another terminal:
 
 ```bash
-uv run perpbot status
-uv run perpbot tui
+perpbot status
+perpbot tui
 ```
 
 ### What to expect
@@ -85,7 +86,7 @@ Built-in controls include:
 If `trade` refuses to start because of the losing-weeks halt, you can override it with:
 
 ```bash
-uv run perpbot trade --force
+perpbot trade --force
 ```
 
 Use that only intentionally.
@@ -95,7 +96,7 @@ Use that only intentionally.
 ### JSON status
 
 ```bash
-uv run perpbot status
+perpbot status
 ```
 
 This reads the daemon state over the Unix socket and prints JSON.
@@ -103,7 +104,7 @@ This reads the daemon state over the Unix socket and prints JSON.
 ### TUI
 
 ```bash
-uv run perpbot tui
+perpbot tui
 ```
 
 Key bindings include:

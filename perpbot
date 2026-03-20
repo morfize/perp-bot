@@ -1,0 +1,15 @@
+#!/bin/sh
+set -eu
+
+ROOT="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+
+if [ -x "$ROOT/.venv/bin/perpbot" ]; then
+    exec "$ROOT/.venv/bin/perpbot" "$@"
+fi
+
+if command -v python3 >/dev/null 2>&1; then
+    exec python3 "$ROOT/main.py" "$@"
+fi
+
+printf '%s\n' "python3 not found" >&2
+exit 1

@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog, and this project follows Semantic Versioning.
 
+## [Unreleased]
+
+### Added
+
+- One-line installer script that downloads a prebuilt standalone binary from GitHub Releases.
+- Release packaging script for OS-specific standalone `perpbot` binaries.
+
+### Changed
+
+- README now treats bare `perpbot` usage as the primary CLI flow instead of `uv run perpbot`.
+- Release automation now targets downloadable standalone binaries in addition to Python package artifacts.
+
 ## [0.1.0] - 2026-03-19
 
 ### Added

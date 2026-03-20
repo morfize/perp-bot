@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 jobs:
-  release:
+  package-release:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,8 +23,41 @@ jobs:
       - name: Build distributions
         run: uv build
 
-      - name: Publish GitHub release
+      - name: Publish Python artifacts
         uses: softprops/action-gh-release@v2
         with:
           files: dist/*
           generate_release_notes: true
+
+  binary-release:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            asset_name: perpbot-linux-x86_64.tar.gz
+          - os: macos-13
+            asset_name: perpbot-macos-x86_64.tar.gz
+          - os: macos-14
+            asset_name: perpbot-macos-arm64.tar.gz
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build standalone binary archive
+        run: ./scripts/build-release-archive.sh ${{ matrix.asset_name }}
+
+      - name: Publish binary artifact
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*

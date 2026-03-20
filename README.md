@@ -23,13 +23,21 @@ This repository is structured as an installable package with a `perpbot` console
 
 ## Quick Start
 
-### 1. Install dependencies
+### 1. Install the CLI
 
 ```bash
-uv sync --group dev
+curl -fsSL https://raw.githubusercontent.com/morfize/perp-bot/main/scripts/install.sh | sh
 ```
 
-### 2. Create local secrets
+This installs a prebuilt standalone binary to `~/.local/bin/perpbot`.
+
+### 2. Verify the command
+
+```bash
+perpbot --help
+```
+
+### 3. Create local secrets
 
 ```bash
 cp .env.example .env
@@ -37,7 +45,7 @@ cp .env.example .env
 
 For paper trading, you can leave the Hyperliquid key empty.
 
-### 3. Review the sample config
+### 4. Review the sample config
 
 The repository ships with a starter [`config.yaml`](config.yaml). By default, `perpbot` reads:
 
@@ -46,59 +54,63 @@ The repository ships with a starter [`config.yaml`](config.yaml). By default, `p
 
 If you pass `--config /path/to/config.yaml`, the CLI also loads `.env` from that config file's directory.
 
-### 4. Backfill data
+### 5. Backfill data
 
 ```bash
-uv run perpbot backfill
+perpbot backfill
 ```
 
-### 5. Run a backtest
+### 6. Run a backtest
 
 ```bash
-uv run perpbot backtest
+perpbot backtest
 ```
 
-### 6. Start paper trading
+### 7. Start paper trading
 
 ```bash
-uv run perpbot trade
+perpbot trade
 ```
 
 In another terminal, you can inspect the daemon:
 
 ```bash
-uv run perpbot status
-uv run perpbot tui
+perpbot status
+perpbot tui
 ```
 
 ## Installation
+
+### One-line install
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/morfize/perp-bot/main/scripts/install.sh | sh
+```
+
+This downloads the latest GitHub release binary for your OS and installs it to `~/.local/bin/perpbot`.
+
+### Install a tagged release
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/morfize/perp-bot/main/scripts/install.sh | env PERPBOT_VERSION=v0.1.0 sh
+```
 
 ### Local development install
 
 ```bash
 uv sync --group dev
-uv run perpbot --help
-```
-
-### Install directly from GitHub
-
-```bash
-uv tool install git+https://github.com/morfize/perp-bot.git
+source .venv/bin/activate
 perpbot --help
-```
-
-### Install a tagged release
-
-```bash
-uv tool install git+https://github.com/morfize/perp-bot.git@v0.1.0
 ```
 
 ### Compatibility shim
 
-Direct execution still works:
+Repo-local execution still works, but this is not the primary install path:
 
 ```bash
-python main.py --help
+./perpbot --help
+./main.py --help
+python3 main.py --help
 ```
 
 ## Configuration
@@ -165,7 +177,7 @@ Live mode sets leverage on startup, reconciles exchange positions against the lo
 Run the global help for all flags:
 
 ```bash
-uv run perpbot --help
+perpbot --help
 ```
 
 ## Architecture Summary
@@ -229,6 +241,7 @@ uv sync --group dev
 uv run ruff check src tests
 uv run pytest
 uv build
+./scripts/build-release-archive.sh perpbot-macos-arm64.tar.gz
 ```
 
 ### Test matrix
@@ -237,7 +250,8 @@ GitHub Actions runs:
 
 - lint on `src` and `tests`
 - test suite on Python `3.12` and `3.13`
-- package build validation
+- Python package build validation
+- standalone binary build validation
 
 ## Deployment
 

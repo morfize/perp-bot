@@ -26,13 +26,14 @@ cp .env.example .env
 ### Verify the CLI
 
 ```bash
-uv run perpbot --help
+source .venv/bin/activate
+perpbot --help
 ```
 
 ### Bootstrap a local database
 
 ```bash
-uv run perpbot backfill
+perpbot backfill
 ```
 
 Without a local database, many commands will not have useful data to work with.
@@ -63,12 +64,18 @@ uv run ruff check src tests
 uv build
 ```
 
+### Build a standalone binary archive
+
+```bash
+./scripts/build-release-archive.sh perpbot-macos-arm64.tar.gz
+```
+
 ### Run the bot locally
 
 ```bash
-uv run perpbot trade
-uv run perpbot status
-uv run perpbot tui
+perpbot trade
+perpbot status
+perpbot tui
 ```
 
 ## Project Conventions
@@ -115,7 +122,7 @@ Recommended loop:
 1. update signal or risk logic
 2. add or update tests
 3. run `uv run pytest`
-4. run `uv run perpbot backtest`
+4. run `perpbot backtest`
 5. inspect downstream report changes
 
 ### Change Execution Behavior
@@ -179,12 +186,13 @@ Local validation:
 
 ```bash
 uv build
+./scripts/build-release-archive.sh perpbot-macos-arm64.tar.gz
 ```
 
 GitHub Actions:
 
 - `.github/workflows/ci.yml` runs lint, tests, and build validation
-- `.github/workflows/release.yml` builds artifacts and creates a GitHub release when a `v*` tag is pushed
+- `.github/workflows/release.yml` builds Python artifacts plus standalone release binaries when a `v*` tag is pushed
 
 Before cutting a release:
 
