@@ -6,6 +6,8 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-03-20
+
 ### Added
 
 - One-line installer script that downloads a prebuilt standalone binary from GitHub Releases.

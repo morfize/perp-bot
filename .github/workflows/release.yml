@@ -26,7 +26,9 @@ jobs:
       - name: Publish Python artifacts
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/*
+          files: |
+            dist/*.whl
+            dist/perp_bot-*.tar.gz
           generate_release_notes: true
 
   binary-release:
@@ -60,4 +62,6 @@ jobs:
       - name: Publish binary artifact
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/*
+          files: |
+            dist/perpbot-*.tar.gz
+            dist/perpbot-*.tar.gz.sha256

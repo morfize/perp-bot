@@ -48,7 +48,7 @@ def test_install_script_prints_tagged_download_url() -> None:
         **os.environ,
         "PERPBOT_OS": "Darwin",
         "PERPBOT_ARCH": "x86_64",
-        "PERPBOT_VERSION": "v0.1.0",
+        "PERPBOT_VERSION": "v0.1.3",
     }
     result = subprocess.run(
         ["sh", str(SCRIPT), "--print-url"],
@@ -61,7 +61,7 @@ def test_install_script_prints_tagged_download_url() -> None:
 
     assert result.returncode == 0
     assert result.stdout.strip() == (
-        "https://github.com/morfize/perp-bot/releases/download/v0.1.0/perpbot-macos-x86_64.tar.gz"
+        "https://github.com/morfize/perp-bot/releases/download/v0.1.3/perpbot-macos-x86_64.tar.gz"
     )
 
 

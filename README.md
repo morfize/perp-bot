@@ -9,7 +9,7 @@ This repository is structured as an installable package with a `perpbot` console
 - Package name: `perp-bot`
 - CLI entry point: `perpbot`
 - Python requirement: `>=3.12`
-- Current release: `0.1.0`
+- Current release: `0.1.3`
 - Maturity: alpha
 
 ## What It Does
@@ -92,7 +92,7 @@ This downloads the latest GitHub release binary for your OS and installs it to `
 ### Install a tagged release
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/morfize/perp-bot/main/scripts/install.sh | env PERPBOT_VERSION=v0.1.0 sh
+curl -fsSL https://raw.githubusercontent.com/morfize/perp-bot/main/scripts/install.sh | env PERPBOT_VERSION=v0.1.3 sh
 ```
 
 ### Local development install

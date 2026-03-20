@@ -15,7 +15,7 @@ Usage:
   curl -fsSL https://raw.githubusercontent.com/$REPO_SLUG/main/scripts/install.sh | sh
 
 Environment:
-  PERPBOT_VERSION       Release tag to install, for example v0.1.0. Default: latest
+  PERPBOT_VERSION       Release tag to install, for example v0.1.3. Default: latest
   PERPBOT_INSTALL_DIR   Install location. Default: \$HOME/.local/bin
   PERPBOT_REPO_SLUG     GitHub repo slug. Default: morfize/perp-bot
   PERPBOT_OS            Override detected OS for testing.
