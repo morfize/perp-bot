@@ -44,6 +44,7 @@ Without a local database, many commands will not have useful data to work with.
 
 ```bash
 uv run pytest
+uv run pytest --cov=src/perp_bot --cov-report=term-missing
 ```
 
 ### Run a focused test
@@ -121,7 +122,7 @@ Recommended loop:
 
 1. update signal or risk logic
 2. add or update tests
-3. run `uv run pytest`
+3. run `uv run pytest --cov=src/perp_bot --cov-report=term-missing`
 4. run `perpbot backtest`
 5. inspect downstream report changes
 

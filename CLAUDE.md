@@ -59,6 +59,7 @@ Seven modules:
 ```bash
 uv sync                          # Install dependencies
 uv run pytest tests/ -v          # Run all tests
+uv run pytest --cov=src/perp_bot --cov-report=term-missing
 uv run pytest tests/test_indicators.py -v  # Run a single test file
 uv run ruff check src/ tests/    # Lint
 perpbot backfill               # Backfill historical data from Hyperliquid

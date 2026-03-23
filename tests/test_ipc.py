@@ -19,6 +19,14 @@ from perp_bot.ipc.state import DaemonState
 # ── Protocol ──────────────────────────────────────────
 
 
+def _start_server_or_skip(server: DaemonStateServer) -> None:
+    """Skip IPC socket tests when the environment blocks AF_UNIX binds."""
+    try:
+        server.start()
+    except PermissionError as exc:
+        pytest.skip(f"AF_UNIX sockets unavailable in this environment: {exc}")
+
+
 class TestProtocol:
     def test_socket_path_derives_from_db(self, tmp_path):
         db_path = tmp_path / "data" / "bot.db"
@@ -92,7 +100,7 @@ def ipc_pair(short_sock_path):
     """Start server + client pair for testing, auto-cleanup."""
     state = DaemonState(mode="paper")
     server = DaemonStateServer(short_sock_path, state)
-    server.start()
+    _start_server_or_skip(server)
     client = DaemonClient(short_sock_path)
     time.sleep(0.1)
     yield state, server, client
@@ -159,7 +167,7 @@ class TestServerClient:
         short_sock_path.touch()
         state = DaemonState()
         server = DaemonStateServer(short_sock_path, state)
-        server.start()
+        _start_server_or_skip(server)
         time.sleep(0.1)
 
         client = DaemonClient(short_sock_path)
@@ -176,7 +184,7 @@ class TestServerClient:
     def test_client_handles_dead_server(self, short_sock_path):
         state = DaemonState()
         server = DaemonStateServer(short_sock_path, state)
-        server.start()
+        _start_server_or_skip(server)
         time.sleep(0.1)
         client = DaemonClient(short_sock_path)
 
@@ -189,7 +197,7 @@ class TestServerClient:
     def test_server_stop_removes_socket(self, short_sock_path):
         state = DaemonState()
         server = DaemonStateServer(short_sock_path, state)
-        server.start()
+        _start_server_or_skip(server)
         time.sleep(0.1)
         assert short_sock_path.exists()
         server.stop()

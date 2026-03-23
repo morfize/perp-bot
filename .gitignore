@@ -19,3 +19,4 @@ data/*.csv
 
 # Tool caches
 .ruff_cache/
+.coverage

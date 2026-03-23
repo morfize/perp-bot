@@ -240,6 +240,7 @@ At a high level:
 uv sync --group dev
 uv run ruff check src tests
 uv run pytest
+uv run pytest --cov=src/perp_bot --cov-report=term-missing
 uv build
 ./scripts/build-release-archive.sh perpbot-macos-arm64.tar.gz
 ```
